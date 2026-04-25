@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="script.skin.contuary" version="1.0.0" name="Contuary Skin Helper" provider-name="Kontell">
+	<requires>
+		<import addon="xbmc.python" version="3.0.0"/>
+	</requires>
+	<extension point="xbmc.python.script" library="default.py">
+		<provides>executable</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en_GB">Helper script for the Contuary skin</summary>
+		<description lang="en_GB">Switches the active &lt;res&gt; declaration in skin.contuary's addon.xml between configured resolution options. Prompts for a Kodi restart, which is required for the change to take effect.</description>
+		<platform>all</platform>
+		<license>GPL-2.0-or-later</license>
+	</extension>
+</addon>
