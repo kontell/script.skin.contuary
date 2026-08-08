@@ -1,0 +1,5 @@
+[B]1.0.0[/B]
+• First release. Switches the active resolution in skin.contuary's addon.xml, scaling the skin's logical coordinate space for larger screens
+• Twelve 16:9 options from 1920x1080 to 2400x1350, chosen from a select dialog or applied directly by name
+• Prompts to quit Kodi after a change, which is required because Kodi only reads the skin's <res> declaration at skin load
+• Keeps Skin.String(resolution) in step with addon.xml, so the value shown in Contuary's skin settings stays correct even if addon.xml was edited by hand

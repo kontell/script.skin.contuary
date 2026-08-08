@@ -1,0 +1,121 @@
+# Quality gates + PR install zip. Shape mirrors plugin.video.kofin ci.yml:
+# this file is the every-PR gate; release.yml handles tags.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  black:
+    name: black
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: black --check
+        run: black --check --diff .
+
+  sanity:
+    name: sanity
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: compileall
+        # No test suite: the addon is 184 lines that only run inside Kodi.
+        # A syntax error is the failure mode worth catching cheaply.
+        run: python -m compileall -q default.py tools/
+
+      - name: OPTIONS is populated and well-formed
+        # Read with ast rather than importing: `import default` would need the
+        # Kodi modules stubbed, and the point is to check the literal, not to
+        # execute anything. skin.contuary's CLAUDE.md documents this list as
+        # the place a new resolution is added, so an empty or malformed entry
+        # is a silently broken selector dialog.
+        run: |
+          python - <<'PY'
+          import ast, sys
+
+          tree = ast.parse(open("default.py", encoding="utf-8").read())
+          options = next(
+              (
+                  ast.literal_eval(node.value)
+                  for node in tree.body
+                  if isinstance(node, ast.Assign)
+                  and any(
+                      isinstance(t, ast.Name) and t.id == "OPTIONS"
+                      for t in node.targets
+                  )
+              ),
+              None,
+          )
+          if not options:
+              sys.exit("OPTIONS is missing or empty in default.py")
+          required = {"name", "width", "height", "aspect"}
+          for entry in options:
+              missing = required - set(entry)
+              if missing:
+                  sys.exit(f"OPTIONS entry {entry!r} is missing {sorted(missing)}")
+              if not isinstance(entry["width"], int) or not isinstance(
+                  entry["height"], int
+              ):
+                  sys.exit(f"OPTIONS entry {entry['name']} has non-integer dimensions")
+          print(f"OPTIONS: {len(options)} resolutions, all well-formed")
+          PY
+
+  package:
+    name: package
+    # Independent of the gates so a style failure still yields an install zip.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build zip
+        run: python3 tools/build.py dist
+
+      - name: Name zip for this run
+        id: name
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          zips=(dist/script.skin.contuary-*.zip)
+          if [[ ${#zips[@]} -ne 1 ]]; then
+            echo "expected exactly one zip in dist/, got: ${zips[*]:-none}" >&2
+            exit 1
+          fi
+          src="${zips[0]}"
+          base="$(basename "$src" .zip)"
+          sha7="$(echo "${{ github.sha }}" | cut -c1-7)"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            dest="dist/${base}-pr${{ github.event.pull_request.number }}-${sha7}.zip"
+          else
+            dest="dist/${base}-main-${sha7}.zip"
+          fi
+          mv "$src" "$dest"
+          echo "zip=$dest" >> "$GITHUB_OUTPUT"
+          ls -la dist/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: script.skin.contuary-zip
+          path: ${{ steps.name.outputs.zip }}
+          retention-days: 14
+          if-no-files-found: error
