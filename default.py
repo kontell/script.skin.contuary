@@ -8,6 +8,7 @@ Usage (via Kodi):
 Kodi parses <res> at skin load, so a Kodi restart is required for the
 new resolution to take effect.
 """
+
 import re
 import sys
 
@@ -48,9 +49,7 @@ def _notify(message, icon=xbmcgui.NOTIFICATION_INFO):
 
 
 def _addon_xml_path():
-    return xbmcvfs.translatePath(
-        "special://home/addons/%s/addon.xml" % SKIN_ID
-    )
+    return xbmcvfs.translatePath("special://home/addons/%s/addon.xml" % SKIN_ID)
 
 
 def _read_addon_xml():
@@ -90,7 +89,7 @@ def _label_for(current):
 
 def _sync_skin_string(current):
     label = _label_for(current)
-    xbmc.executebuiltin('Skin.SetString(%s,%s)' % (SKIN_STRING, label))
+    xbmc.executebuiltin("Skin.SetString(%s,%s)" % (SKIN_STRING, label))
 
 
 def _select_option(current):
@@ -102,9 +101,7 @@ def _select_option(current):
             label += "  [current]"
             preselect = i
         labels.append(label)
-    sel = xbmcgui.Dialog().select(
-        "Contuary Resolution", labels, preselect=preselect
-    )
+    sel = xbmcgui.Dialog().select("Contuary Resolution", labels, preselect=preselect)
     if sel < 0:
         return None
     return OPTIONS[sel]
@@ -119,27 +116,22 @@ def _apply(target, xml):
     new_xml, n = _DEFAULT_RES_RE.subn(new_line, xml, count=1)
     if n == 0:
         _log("active <res> line not found", xbmc.LOGERROR)
-        _notify("Active <res> line not found in addon.xml",
-                xbmcgui.NOTIFICATION_ERROR)
+        _notify("Active <res> line not found in addon.xml", xbmcgui.NOTIFICATION_ERROR)
         return False
     if not _write_addon_xml(new_xml):
-        _notify("Could not write skin addon.xml",
-                xbmcgui.NOTIFICATION_ERROR)
+        _notify("Could not write skin addon.xml", xbmcgui.NOTIFICATION_ERROR)
         return False
     _log("set default <res> to %s" % target["name"])
-    xbmc.executebuiltin('Skin.SetString(%s,%s)'
-                        % (SKIN_STRING, target["name"]))
+    xbmc.executebuiltin("Skin.SetString(%s,%s)" % (SKIN_STRING, target["name"]))
     return True
 
 
 def main():
-    arg = (sys.argv[1].strip()
-           if len(sys.argv) >= 2 and sys.argv[1].strip() else None)
+    arg = sys.argv[1].strip() if len(sys.argv) >= 2 and sys.argv[1].strip() else None
 
     xml = _read_addon_xml()
     if xml is None:
-        _notify("Could not read skin addon.xml",
-                xbmcgui.NOTIFICATION_ERROR)
+        _notify("Could not read skin addon.xml", xbmcgui.NOTIFICATION_ERROR)
         return
 
     current = _current(xml)
@@ -159,8 +151,7 @@ def main():
         )
         if target is None:
             names = ", ".join(o["name"] for o in OPTIONS)
-            _notify("Unknown option (try: %s)" % names,
-                    xbmcgui.NOTIFICATION_ERROR)
+            _notify("Unknown option (try: %s)" % names, xbmcgui.NOTIFICATION_ERROR)
             return
 
     if current == (target["width"], target["height"]):
