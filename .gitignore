@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+.tox/
+.pytest_cache/
+tests/live/results/
+dist/
