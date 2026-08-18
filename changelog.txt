@@ -1,3 +1,7 @@
+[B]1.1.0[/B]
+• Home menu: generate one Movies/Shows-style section per Kofin library, bound to that library's synced Kodi nodes or live plugin paths
+• Skin settings entry to add, rename, re-icon, reorder and delete those sections
+
 [B]1.0.0[/B]
 • First release. Switches the active resolution in skin.contuary's addon.xml, scaling the skin's logical coordinate space for larger screens
 • Twelve 16:9 options from 1920x1080 to 2400x1350, chosen from a select dialog or applied directly by name

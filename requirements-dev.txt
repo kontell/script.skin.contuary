@@ -5,4 +5,5 @@ Kodistubs==21.*
 # Bump this line on purpose, in its own commit, and add the reformat to
 # .git-blame-ignore-revs if it is large.
 black==26.5.1
+pytest
 tox

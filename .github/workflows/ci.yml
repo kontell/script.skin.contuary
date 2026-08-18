@@ -43,21 +43,17 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: compileall
-        # No test suite: the addon is 184 lines that only run inside Kodi.
-        # A syntax error is the failure mode worth catching cheaply.
-        run: python -m compileall -q default.py tools/
+        run: python -m compileall -q default.py lib/ tools/
 
       - name: OPTIONS is populated and well-formed
-        # Read with ast rather than importing: `import default` would need the
-        # Kodi modules stubbed, and the point is to check the literal, not to
-        # execute anything. skin.contuary's CLAUDE.md documents this list as
-        # the place a new resolution is added, so an empty or malformed entry
-        # is a silently broken selector dialog.
+        # Read with ast rather than importing: importing resolution.py would
+        # need the Kodi modules stubbed, and the point is to check the literal.
+        # The list lives in lib/resolution.py (default.py only dispatches).
         run: |
           python - <<'PY'
           import ast, sys
 
-          tree = ast.parse(open("default.py", encoding="utf-8").read())
+          tree = ast.parse(open("lib/resolution.py", encoding="utf-8").read())
           options = next(
               (
                   ast.literal_eval(node.value)
@@ -71,7 +67,7 @@ jobs:
               None,
           )
           if not options:
-              sys.exit("OPTIONS is missing or empty in default.py")
+              sys.exit("OPTIONS is missing or empty in lib/resolution.py")
           required = {"name", "width", "height", "aspect"}
           for entry in options:
               missing = required - set(entry)
