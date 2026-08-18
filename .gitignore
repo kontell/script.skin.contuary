@@ -1,7 +1,10 @@
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
+venv/
 .tox/
+.mypy_cache/
 .pytest_cache/
-tests/live/results/
 dist/
+.claude/
+tests/live/results/
