@@ -1,4 +1,4 @@
-[B]1.1.0[/B]
+v1.1.0
 • Home menu: generate one Movies/Shows-style section per Kofin library, bound to that library's synced Kodi nodes or live plugin paths
 • Skin settings entry to add, rename, re-icon, reorder and delete those sections
 
