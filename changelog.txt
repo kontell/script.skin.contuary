@@ -1,3 +1,6 @@
+v1.2.0
+• Resolution selector adds the aspect ratios Estuary ships commented out of addon.xml: 4:3, 3:2, 16:10, 17:9, 21:9, 19.5:9 and 18:9. The dialog shows the aspect beside the size. The skin string stays the bare name
+
 v1.1.0
 • Home menu: generate one Movies/Shows-style section per Kofin library, bound to that library's synced Kodi nodes or live plugin paths
 • Skin settings entry to add, rename, re-icon, reorder and delete those sections
