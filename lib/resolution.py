@@ -21,6 +21,16 @@ OPTIONS = [
     {"name": "2304x1296", "width": 2304, "height": 1296, "aspect": "16:9"},
     {"name": "2352x1323", "width": 2352, "height": 1323, "aspect": "16:9"},
     {"name": "2400x1350", "width": 2400, "height": 1350, "aspect": "16:9"},
+    # The aspects Estuary ships commented out of addon.xml. One default
+    # <res> stays active; these are choices the selector writes in, in
+    # the same order as that comment.
+    {"name": "1920x1440", "width": 1920, "height": 1440, "aspect": "4:3"},
+    {"name": "1920x1280", "width": 1920, "height": 1280, "aspect": "3:2"},
+    {"name": "1920x1200", "width": 1920, "height": 1200, "aspect": "16:10"},
+    {"name": "2040x1080", "width": 2040, "height": 1080, "aspect": "17:9"},
+    {"name": "2560x1080", "width": 2560, "height": 1080, "aspect": "21:9"},
+    {"name": "2338x1080", "width": 2338, "height": 1080, "aspect": "19.5:9"},
+    {"name": "2160x1080", "width": 2160, "height": 1080, "aspect": "18:9"},
 ]
 
 SKIN_ID = "skin.contuary"
@@ -79,7 +89,7 @@ def _select_option(current):
     labels = []
     preselect = -1
     for i, opt in enumerate(OPTIONS):
-        label = opt["name"]
+        label = "%s (%s)" % (opt["name"], opt["aspect"])
         if current and (opt["width"], opt["height"]) == current:
             label += "  [current]"
             preselect = i
