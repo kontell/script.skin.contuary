@@ -1,3 +1,6 @@
+v1.2.1
+• A resolution change applies at once; Kodi no longer has to restart
+
 v1.2.0
 • Resolution selector adds the aspect ratios Estuary ships commented out of addon.xml: 4:3, 3:2, 16:10, 17:9, 21:9, 19.5:9 and 18:9. The dialog shows the aspect beside the size. The skin string stays the bare name
 
