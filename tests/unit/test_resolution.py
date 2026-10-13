@@ -75,3 +75,72 @@ def test_apply_writes_the_chosen_aspect(kodi_fs):
         '<res width="2338" height="1080" aspect="19.5:9" '
         'default="true" folder="xml" />'
     ) in written
+
+
+def _run(kodi_fs, monkeypatch, arg, sample=SAMPLE):
+    """Run the resolution path over ``sample``; the builtins it issued, and
+    the dialogs it raised."""
+    import resolution
+
+    path = kodi_fs["home"] / "addons" / "skin.contuary" / "addon.xml"
+    path.write_text(sample, encoding="utf-8")
+    builtins, asked = [], []
+    monkeypatch.setattr(
+        resolution.xbmc,
+        "executebuiltin",
+        lambda command, wait=False: builtins.append((command, wait)),
+    )
+
+    class Dialog:
+        def notification(self, _heading, message, *_args):
+            asked.append(("notification", message))
+
+        def yesno(self, *_args, **_kwargs):
+            asked.append(("yesno",))
+            return False
+
+    monkeypatch.setattr(resolution.xbmcgui, "Dialog", Dialog)
+    resolution.run(arg)
+    return builtins, asked, path.read_text(encoding="utf-8")
+
+
+def test_a_change_takes_effect_by_a_rescan_and_a_reload_not_a_restart(
+    kodi_fs, monkeypatch
+):
+    """Kodi sizes a skin from the add-on manager's copy of addon.xml, so the
+    manager reads the file again before the skin is reloaded, and the scan
+    is waited for. Nobody is asked to quit Kodi."""
+    builtins, asked, written = _run(kodi_fs, monkeypatch, "2256x1269")
+
+    assert 'width="2256" height="1269"' in written
+    assert builtins == [
+        ("Skin.SetString(resolution,1920x1080)", False),
+        ("Skin.SetString(resolution,2256x1269)", False),
+        ("UpdateLocalAddons()", True),
+        ("ReloadSkin()", False),
+    ]
+    assert asked == []
+
+
+def test_nothing_is_reloaded_when_nothing_was_written(kodi_fs, monkeypatch):
+    # Already at that size.
+    builtins, asked, written = _run(kodi_fs, monkeypatch, "1920x1080")
+    assert written == SAMPLE
+    assert [command for command, _ in builtins] == [
+        "Skin.SetString(resolution,1920x1080)"
+    ]
+    assert asked == [("notification", "Already at 1920x1080")]
+    # A name the table does not have.
+    builtins, _, written = _run(kodi_fs, monkeypatch, "640x480")
+    assert written == SAMPLE and not any("Reload" in c for c, _ in builtins)
+    # No active line to rewrite.
+    broken = SAMPLE.replace('default="true"', 'default="false"')
+    builtins, _, written = _run(kodi_fs, monkeypatch, "2256x1269", broken)
+    assert written == broken
+    assert not any("Reload" in c or "UpdateLocal" in c for c, _ in builtins)
+
+
+def test_a_sync_never_reloads(kodi_fs, monkeypatch):
+    builtins, asked, written = _run(kodi_fs, monkeypatch, "_sync")
+    assert written == SAMPLE and asked == []
+    assert builtins == [("Skin.SetString(resolution,1920x1080)", False)]

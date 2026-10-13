@@ -11,7 +11,7 @@ RunScript(script.skin.contuary,_sync)
 RunScript(script.skin.contuary,kofinmenu)
 ```
 
-The selector rewrites the one default `<res>` line in the skin's `addon.xml`. Kodi reads that line when the skin loads, so a resolution change needs a restart. The dialog shows the aspect beside the size. `Skin.String(resolution)` stays the bare name, such as `1920x1200`.
+The selector rewrites the one default `<res>` line in the skin's `addon.xml`, has Kodi read its add-ons again (`UpdateLocalAddons()`) and reloads the skin, so the change shows at once and needs no restart. The dialog shows the aspect beside the size. `Skin.String(resolution)` stays the bare name, such as `1920x1200`.
 
 Choices are the 16:9 steps from 1920x1080 to 2400x1350, then the aspects Estuary leaves commented out of `addon.xml`: 4:3, 3:2, 16:10, 17:9, 21:9, 19.5:9 and 18:9.
 
