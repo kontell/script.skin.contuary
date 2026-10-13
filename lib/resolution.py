@@ -1,4 +1,5 @@
-"""Switch the active <res> in skin.contuary's addon.xml."""
+"""Switch the active <res> in skin.contuary's addon.xml, and reload the skin
+at the new size."""
 
 import re
 
@@ -119,6 +120,20 @@ def _apply(target, xml):
     return True
 
 
+def _reload():
+    """Have Kodi take the new ``<res>`` line now, without a restart.
+
+    A skin's size is decided when the skin loads, from the add-on manager's
+    copy of addon.xml, and the manager reads that file once: reloading the
+    skin alone loads it at the size it had. ``UpdateLocalAddons()`` has the
+    manager read every addon.xml again, and the reload after it loads the
+    skin from what was just written. The scan is waited for, so the reload
+    never runs ahead of it.
+    """
+    xbmc.executebuiltin("UpdateLocalAddons()", True)
+    xbmc.executebuiltin("ReloadSkin()")
+
+
 def run(arg):
     """Resolution path. ``arg`` is None, ``_sync``, or a named option."""
     xml = _read_addon_xml()
@@ -153,11 +168,4 @@ def run(arg):
     if not _apply(target, xml):
         return
 
-    if xbmcgui.Dialog().yesno(
-        "Contuary",
-        "Resolution set to %s.\n\nKodi must restart for the change to "
-        "take effect. Quit Kodi now?" % target["name"],
-    ):
-        xbmc.executebuiltin("Quit")
-    else:
-        notify("Restart Kodi to apply %s" % target["name"])
+    _reload()
